@@ -1,25 +1,58 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from 'react'
 
-function App() {
+const Button = (probs) => {
+  const {handleClick, text} = probs
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <button onClick={handleClick} >{text}</button>
+  )
 }
 
-export default App;
+const Statistic = (probs) => {
+  const {good, neutral, bad} = probs
+  if ((good + neutral + bad) === 0) {
+    return (
+      <div>No feedback given</div>
+    )
+  }
+  return (
+    <table>
+      <StatisticLine text = "good" value = {good} />
+      <StatisticLine text = "neutral" value = {neutral} />
+      <StatisticLine text = "bad" value = {bad} />
+      <StatisticLine text = "all" value = {good + neutral + bad} />
+      <StatisticLine text = "average" value = {(good - bad) / (good + neutral + bad)} />
+      <StatisticLine text = "positive" value = {(good / (good + neutral + bad))* 100 + " %"} />
+    </table>
+  )
+}
+
+const StatisticLine = (probs) => {
+  const {text, value} = probs
+  return (
+    <tr>
+      <td>{text}</td>
+      <td>{value}</td>
+    </tr>
+  )
+}
+
+const App = () => {
+  // save clicks of each button to its own state
+  const [good, setGood] = useState(0)
+  const [neutral, setNeutral] = useState(0)
+  const [bad, setBad] = useState(0)
+
+  return (
+    <div>
+      <h1>give feedback</h1>
+      <Button text = "good" handleClick = {() => setGood(good + 1)} />
+      <Button text = "neutral" handleClick = {() => setNeutral(neutral + 1)} />
+      <Button text = "bad" handleClick = {() => setBad(bad + 1)} />
+
+      <h1>statistics</h1>
+      <Statistic good = {good} neutral = {neutral} bad = {bad} />
+    </div>
+  )
+}
+
+export default App
