@@ -41,7 +41,11 @@ const App = () => {
 
 
   const selectNextRandom = () => {
-    setSelected(Math.floor(Math.random() * anecdotes.length))
+    let nextSelected = selected
+    while (nextSelected === selected) {
+      nextSelected = Math.floor(Math.random() * anecdotes.length)
+    }
+    setSelected(nextSelected)
   }
 
   const addPointToSelected = () => {
