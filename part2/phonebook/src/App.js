@@ -1,31 +1,9 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
-const Filter = (probs) => {
-  return (
-    <div>filter shown with <input value = {probs.filter} onChange={probs.handleFilterChange}/></div>
-  )
-}
-
-const PersonForm = (probs) => {
-  return (
-    <form onSubmit={probs.addPerson}>
-      <div>name: <input value = {probs.newName} onChange={probs.handleNameChange}/></div>
-      <div>number: <input value = {probs.newNumber} onChange={probs.handleNumberChange}/></div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  )
-}
-
-const Persons = (probs) => {
-  return (
-    <div>
-      {probs.persons.map(person => <div key = {person.id}>{person.name} {person.number}</div>)}
-    </div>
-  )
-}
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 
 
 const App = () => {
@@ -56,6 +34,8 @@ const App = () => {
       setPersons(newPersons)
       const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
       setShownPersons(newShownPersons)
+      setNewName('')
+      setNewNumber('')
     }
   }
 
