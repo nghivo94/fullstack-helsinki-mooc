@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 
+import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -12,30 +13,86 @@ const App = () => {
   const [filter, setFilter] = useState('')
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [notification, setNotification] = useState({})
 
-  const hook = () => {
-    axios
-      .get('http://localhost:3001/persons')
+  useEffect(() => {
+    personService
+      .getAll()
       .then(response => {
-        console.log(response)
         setPersons(response.data)
         setShownPersons(response.data)
       })
-  }
-  useEffect(hook, [])
+    }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
-    if (persons.filter(person => person.name === newName).length === 1) {
-      alert(`${newName} is already added to phonebook`)
+    if (persons.find(person => person.name === newName)) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const updatedPerson = persons.find(person => person.name === newName)
+        personService
+          .update(updatedPerson.id, {...updatedPerson, number : newNumber})
+          .then(response => {
+            const newPersons  = persons.map(person => person.id !== updatedPerson.id ? person : response.data)
+            const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+            setPersons(newPersons)
+            setShownPersons(newShownPersons)
+            setNewName('')
+            setNewNumber('')
+            setNotification({message : `Updated ${updatedPerson.name}'s number`})
+            setTimeout(() => {
+              setNotification({})
+            }, 5000)
+          })
+          .catch(error => {
+            const newPersons  = persons.filter(person => person.id !== updatedPerson.id)
+            const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+            setPersons(newPersons)
+            setShownPersons(newShownPersons)
+            setNotification({message: `Information of ${updatedPerson.name} has already been removed from the server.`, isError: true})
+            setTimeout(() => {
+              setNotification({})
+            }, 5000)
+          })
+      }
     }
     else {
-      const newPersons = [...persons, { name: newName , number : newNumber, id : persons.length + 1}]
-      setPersons(newPersons)
-      const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
-      setShownPersons(newShownPersons)
-      setNewName('')
-      setNewNumber('')
+      const newPerson = {
+        name: newName,
+        number: newNumber
+      }
+
+      personService
+        .create(newPerson)
+        .then(response => {
+          const newPersons = [...persons, response.data]
+          const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+          setPersons(newPersons)
+          setShownPersons(newShownPersons)
+          setNewName('')
+          setNewNumber('')
+          setNotification({message : `Added ${newPerson.name}`})
+          setTimeout(() => {
+            setNotification({})
+          }, 5000)
+        })
+    }
+  }
+
+  const deletePerson = (id) => {
+    const deletedPerson = persons.find(person => person.id === id)
+    if (window.confirm(`Delete ${deletedPerson.name} ?`)) {
+      personService
+        .remove(id)
+        .then(() => {
+          const newPersons = persons.filter(person => person.id !== id)
+          const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+          setPersons(newPersons)
+          setShownPersons(newShownPersons)
+          setNotification({message : `Deleted ${deletedPerson.name}`})
+          setTimeout(() => {
+            setNotification({})
+          }, 5000)
+        })
     }
   }
 
@@ -56,12 +113,13 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message = {notification.message} isError = {notification.isError}/>
       <Filter filter = {filter} handleFilterChange = {handleFilterChange}/>
       <h2>Add a new</h2>
       <PersonForm addPerson = {addPerson} newName = {newName} handleNameChange ={handleNameChange} 
                   newNumber = {newNumber} handleNumberChange = {handleNumberChange}/>
       <h2>Numbers</h2>
-      <Persons persons = {shownPersons} />
+      <Persons persons = {shownPersons} handleDelete = {deletePerson}/>
     </div>
   )
 }
