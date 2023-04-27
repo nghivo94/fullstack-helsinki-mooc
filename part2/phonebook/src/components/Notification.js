@@ -11,7 +11,7 @@ const Notification = (probs) => {
 
   const errorStyle = {...generalStyle, color: 'red'}
 
-  if (probs.message == null) {
+  if (!probs.message) {
     return null
   }
 

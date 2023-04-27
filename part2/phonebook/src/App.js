@@ -13,7 +13,8 @@ const App = () => {
   const [filter, setFilter] = useState('')
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
-  const [notification, setNotification] = useState({})
+  const [message, setMessage] = useState('')
+  const [isError, setIsError] = useState(false)
 
   useEffect(() => {
     personService
@@ -22,7 +23,20 @@ const App = () => {
         setPersons(response.data)
         setShownPersons(response.data)
       })
-    }, [])
+  }, [])
+
+  useEffect(() => {
+    const newShownPersons = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+    setShownPersons(newShownPersons)
+  }, [persons])
+
+  useEffect(() => {
+    if (message) {
+      setTimeout(() => {
+        setMessage('')
+      }, 5000)
+    }
+  }, [message])
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -33,25 +47,17 @@ const App = () => {
           .update(updatedPerson.id, {...updatedPerson, number : newNumber})
           .then(response => {
             const newPersons  = persons.map(person => person.id !== updatedPerson.id ? person : response.data)
-            const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
             setPersons(newPersons)
-            setShownPersons(newShownPersons)
             setNewName('')
             setNewNumber('')
-            setNotification({message : `Updated ${updatedPerson.name}'s number`})
-            setTimeout(() => {
-              setNotification({})
-            }, 5000)
+            setMessage(`Updated ${updatedPerson.name}'s number`)
+            setIsError(false)
           })
           .catch(error => {
             const newPersons  = persons.filter(person => person.id !== updatedPerson.id)
-            const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
             setPersons(newPersons)
-            setShownPersons(newShownPersons)
-            setNotification({message: `Information of ${updatedPerson.name} has already been removed from the server.`, isError: true})
-            setTimeout(() => {
-              setNotification({})
-            }, 5000)
+            setMessage(`Information of ${updatedPerson.name} has already been removed from the server.`)
+            setIsError(true)
           })
       }
     }
@@ -65,15 +71,11 @@ const App = () => {
         .create(newPerson)
         .then(response => {
           const newPersons = [...persons, response.data]
-          const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
           setPersons(newPersons)
-          setShownPersons(newShownPersons)
           setNewName('')
           setNewNumber('')
-          setNotification({message : `Added ${newPerson.name}`})
-          setTimeout(() => {
-            setNotification({})
-          }, 5000)
+          setMessage(`Added ${newPerson.name}`)
+          setIsError(false)
         })
     }
   }
@@ -85,13 +87,9 @@ const App = () => {
         .remove(id)
         .then(() => {
           const newPersons = persons.filter(person => person.id !== id)
-          const newShownPersons = newPersons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
           setPersons(newPersons)
-          setShownPersons(newShownPersons)
-          setNotification({message : `Deleted ${deletedPerson.name}`})
-          setTimeout(() => {
-            setNotification({})
-          }, 5000)
+          setMessage(`Deleted ${deletedPerson.name}`)
+          setIsError(false)
         })
     }
   }
@@ -113,7 +111,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message = {notification.message} isError = {notification.isError}/>
+      <Notification message = {message} isError = {isError}/>
       <Filter filter = {filter} handleFilterChange = {handleFilterChange}/>
       <h2>Add a new</h2>
       <PersonForm addPerson = {addPerson} newName = {newName} handleNameChange ={handleNameChange} 
