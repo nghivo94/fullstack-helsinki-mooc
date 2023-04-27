@@ -15,6 +15,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [message, setMessage] = useState('')
   const [isError, setIsError] = useState(false)
+  const [notiTimeout, setNotiTimeout] = useState(setTimeout(() => {return null}, 0))
 
   useEffect(() => {
     personService
@@ -32,9 +33,8 @@ const App = () => {
 
   useEffect(() => {
     if (message) {
-      setTimeout(() => {
-        setMessage('')
-      }, 5000)
+      clearTimeout(notiTimeout)
+      setNotiTimeout(setTimeout(() => {setMessage('')}, 5000))
     }
   }, [message])
 
