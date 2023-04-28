@@ -3,7 +3,7 @@ const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
-const postResultMorganToken = morgan.token('post-result', function (request, response) {
+morgan.token('post-result', function (request, response) {
   if (request.method === 'POST') {
     return JSON.stringify(request.body)
   }
