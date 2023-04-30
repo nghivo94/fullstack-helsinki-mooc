@@ -2,6 +2,7 @@ const express = require('express')
 const morgan = require('morgan')
 const app = express()
 
+app.use(express.static('build'))
 app.use(express.json())
 morgan.token('post-result', function (request, response) {
   if (request.method === 'POST') {
