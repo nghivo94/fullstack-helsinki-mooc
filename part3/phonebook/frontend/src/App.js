@@ -54,10 +54,15 @@ const App = () => {
             setIsError(false)
           })
           .catch(error => {
-            const newPersons  = persons.filter(person => person.id !== updatedPerson.id)
-            setPersons(newPersons)
-            setMessage(`Information of ${updatedPerson.name} has already been removed from the server.`)
-            setIsError(true)
+            if (error.response.data.name === 'CastError' || error.response.data.name === 'ValidationError') {
+              setMessage(error.response.data.error)
+              setIsError(true)
+            } else {
+              const newPersons  = persons.filter(person => person.id !== updatedPerson.id)
+              setPersons(newPersons)
+              setMessage(`Information of ${updatedPerson.name} has already been removed from the server.`)
+              setIsError(true)
+            }
           })
       }
     }
@@ -76,6 +81,10 @@ const App = () => {
           setNewNumber('')
           setMessage(`Added ${newPerson.name}`)
           setIsError(false)
+        })
+        .catch(error => {
+          setMessage(error.response.data.error)
+          setIsError(true)
         })
     }
   }
