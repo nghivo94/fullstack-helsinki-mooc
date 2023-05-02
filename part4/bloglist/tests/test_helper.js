@@ -61,16 +61,6 @@ const extractBlogInfo = (blog) => {
     }
 }
 
-const nonExistingId = async () => {
-    const blogObject = new Blog(validNewBlog)
-    const blog = await blogObject.save()
-    const blogId = blog._id.toString()
-    
-    await Blog.findByIdAndRemove(blogId)
-    
-    return blogId
-}
-
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
     return blogs.map(blog => blog.toJSON())
@@ -78,5 +68,5 @@ const blogsInDb = async () => {
 
 module.exports = {
     initialBlogs, validNewBlog, validNoLikesNewBlog, missingTitleNewBlog, missingURLNewBlog, 
-    extractBlogInfo, nonExistingId, blogsInDb
+    extractBlogInfo, blogsInDb
 }

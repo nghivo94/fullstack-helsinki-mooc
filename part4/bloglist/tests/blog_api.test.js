@@ -105,9 +105,7 @@ describe('when there is initially some notes saved', () => {
 
       const blogsAtEnd = await testHelper.blogsInDb()
       expect(blogsAtEnd).toHaveLength(testHelper.initialBlogs.length - 1)
-      
-      const blogs = blogsAtEnd.map(blog => testHelper.extractBlogInfo(blog))
-      expect(blogs).not.toContainEqual(testHelper.extractBlogInfo(blogToDelete))
+      expect(blogsAtEnd).not.toContainEqual(blogToDelete)
     })
   })
 
@@ -125,7 +123,7 @@ describe('when there is initially some notes saved', () => {
         .expect(200)
         .expect('Content-Type', /application\/json/)
 
-      expect(testHelper.extractBlogInfo(resultBlog.body)).toEqual(testHelper.extractBlogInfo(blogToUpdate))
+      expect(resultBlog.body).toEqual(blogToUpdate)
 
       const blogsAtEnd = await testHelper.blogsInDb()
       expect(blogsAtEnd).toHaveLength(testHelper.initialBlogs.length)
