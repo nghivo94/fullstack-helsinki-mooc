@@ -11,8 +11,24 @@ const initialUsers = [
         username: "mluukkai",
         name: "Matti Luukkainen",
         password: "salainen"
-    },
+    }
 ]
+
+const validLogin = {
+    username: "mluukkai",
+    name: "Matti Luukkainen",
+    password: "salainen"
+}
+
+const invalidUsernameLogin = {
+    username: "unknown",
+    password: "salainen"
+}
+
+const invalidPasswordLogin = {
+    username: "mluukkai",
+    password: "wrongpassword"
+}
 
 const validNewUser = {
     username: "artohellas",
@@ -157,8 +173,9 @@ const blogsInDb = async () => {
 }
 
 module.exports = {
-    initialUsers, validNewUser, missingUsernameNewUser, shortUsernameNewUser, nonUniqueUsernameNewUser,
-    missingPasswordNewUser, shortPasswordNewUser, 
+    initialUsers, validLogin, invalidUsernameLogin, invalidPasswordLogin,
+    validNewUser, missingUsernameNewUser, shortUsernameNewUser, nonUniqueUsernameNewUser,
+    missingPasswordNewUser, shortPasswordNewUser,
     usersInDb, userWithBlogs, generateValidToken, generateInvalidToken, generateMismatchedToken,
     initialBlogs, validNewBlog, validNoLikesNewBlog, missingTitleNewBlog, missingURLNewBlog, 
     blogsInDb

@@ -133,6 +133,40 @@ describe('when there are initially some users saved and some notes saved for 1 u
     })
   })
 
+  describe('login with username and password', () => {
+    test('succeeds with valid username and password', async () => {
+      const user = testHelper.validLogin
+      const result = await api
+        .post('/api/login')
+        .send(user)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+      
+      expect(result.body.username).toBe(user.username)
+      expect(result.body.name).toBe(testHelper.initialUsers[1].name)
+    })
+
+    test('fails with invalid username', async () => {
+      const invalidLogin = testHelper.invalidUsernameLogin
+      const result = await api
+        .post('/api/login')
+        .send(invalidLogin)
+        .expect(401)
+      
+      expect(result.body.error).toContain("invalid username or password!")
+    })
+
+    test('fails with invalid password', async () => {
+      const invalidLogin = testHelper.invalidPasswordLogin
+      const result = await api
+        .post('/api/login')
+        .send(invalidLogin)
+        .expect(401)
+      
+      expect(result.body.error).toContain("invalid username or password!")
+    })
+  })
+
   describe('when accessing blogs', () => {
     test('blogs are returned as json', async () => {
       await api
