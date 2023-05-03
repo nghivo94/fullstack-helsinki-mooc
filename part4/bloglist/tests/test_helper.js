@@ -1,4 +1,103 @@
+const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
+const initialUsers = [
+    {
+        username: "root",
+        password: "secret"
+    },
+    {
+        username: "mluukkai",
+        name: "Matti Luukkainen",
+        password: "salainen"
+    },
+]
+
+const validNewUser = {
+    username: "artohellas",
+    name: "Arto Hellas",
+    password: "sallehotra"
+}
+
+const missingUsernameNewUser = {
+    name: "Arto Hellas",
+    password: "sallehotra"
+}
+
+const shortUsernameNewUser = {
+    username: "ar",
+    name: "Arto Hellas",
+    password: "sallehotra"
+}
+
+const nonUniqueUsernameNewUser = {
+    username: "root",
+    password: "something"
+}
+
+const missingPasswordNewUser = {
+    username: "artohellas",
+    name: "Arto Hellas",
+}
+
+const shortPasswordNewUser = {
+    username: "artohellas",
+    name: "Arto Hellas",
+    password: "sa"
+}
+
+const usersInDb = async () => {
+    const users = await User.find({})
+    return users.map(user => user.toJSON())
+}
+
+const userWithBlogs = async () => {
+    const users = await User.find({})
+    return users[0]
+}
+
+const generateValidToken = async () => {
+    const users = await User.find({})
+    const userWithBlogs = users[0]
+    const userForToken = {
+        username: userWithBlogs.username,
+        id: userWithBlogs._id
+    }
+    const token = jwt.sign(
+        userForToken, 
+        process.env.SECRET,
+        { expiresIn: 60*60 }
+    )
+
+    return token
+}
+
+const generateInvalidToken = () => {
+    const token = jwt.sign(
+        {username: "something", id: "something"}, 
+        "some random string",
+        { expiresIn: 60*60 }
+    )
+
+    return token
+}
+
+const generateMismatchedToken = async () => {
+    const users = await User.find({})
+    const userWithoutBlogs = users[1]
+    const userForToken = {
+        username: userWithoutBlogs.username,
+        id: userWithoutBlogs._id
+    }
+    const token = jwt.sign(
+        userForToken, 
+        process.env.SECRET,
+        { expiresIn: 60*60 }
+    )
+
+    return token
+}
 
 const initialBlogs = [
     {
@@ -52,21 +151,15 @@ const missingURLNewBlog = {
     likes: 5
 }
 
-const extractBlogInfo = (blog) => {
-    return {
-        title: blog.title,
-        author: blog.author,
-        url: blog.url,
-        likes: blog.likes
-    }
-}
-
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
     return blogs.map(blog => blog.toJSON())
 }
 
 module.exports = {
+    initialUsers, validNewUser, missingUsernameNewUser, shortUsernameNewUser, nonUniqueUsernameNewUser,
+    missingPasswordNewUser, shortPasswordNewUser, 
+    usersInDb, userWithBlogs, generateValidToken, generateInvalidToken, generateMismatchedToken,
     initialBlogs, validNewBlog, validNoLikesNewBlog, missingTitleNewBlog, missingURLNewBlog, 
-    extractBlogInfo, blogsInDb
+    blogsInDb
 }
