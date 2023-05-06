@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit"
+import anecdoteService from "../services/anecdotes"
 
 const compareAnecdotes = (anecdote1, anecdote2) => {
     if (anecdote1.votes > anecdote2.votes) {
@@ -14,7 +15,7 @@ const anecdoteSlice = createSlice({
     name: 'anecdotes',
     initialState: [],
     reducers: {
-        createAnecdote (state, action) {
+        appendAnecdote (state, action) {
             state.push(action.payload)
         },
         addVoteOf (state, action) {
@@ -33,5 +34,29 @@ const anecdoteSlice = createSlice({
     }
 })
 
-export const { createAnecdote, addVoteOf, setAnecdotes } = anecdoteSlice.actions
+export const { appendAnecdote, addVoteOf, setAnecdotes } = anecdoteSlice.actions
+
+export const initializeAnecdotes = () => {
+    return async dispatch => {
+        const anecdotes = await anecdoteService.getAll()
+        dispatch(setAnecdotes(anecdotes))
+    }
+}
+
+export const createAnecdote = content => {
+    return async dispatch => {
+        const newAnecdote = await anecdoteService.createNew(content)
+        dispatch(appendAnecdote(newAnecdote))
+    }
+}
+
+export const voteAnecdote = id => {
+    return async dispatch => {
+        const anecdoteToVote = await anecdoteService.get(id)
+        const votedAnecdote = {...anecdoteToVote, votes: anecdoteToVote.votes + 1}
+        await anecdoteService.update(id, votedAnecdote)
+        dispatch(addVoteOf(id))
+    }
+}
+
 export default anecdoteSlice.reducer
